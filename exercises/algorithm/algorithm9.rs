@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // Add the new value at the end
+        self.items.push(value);
+        self.count += 1;
+        
+        // Bubble up to maintain heap property
+        let mut idx = self.count;
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +70,20 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        
+        // If right child doesn't exist, return left
+        if right > self.count {
+            return left;
+        }
+        
+        // Return the child that satisfies the comparator
+        if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +109,30 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+        
+        // Swap root with last element
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+        
+        // Bubble down to maintain heap property
+        if self.count > 0 {
+            let mut idx = 1;
+            while self.children_present(idx) {
+                let smallest_child = self.smallest_child_idx(idx);
+                if (self.comparator)(&self.items[smallest_child], &self.items[idx]) {
+                    self.items.swap(idx, smallest_child);
+                    idx = smallest_child;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        result
     }
 }
 

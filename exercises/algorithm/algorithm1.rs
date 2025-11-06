@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -70,13 +69,90 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	where
+		T: PartialOrd,
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+		let mut result = LinkedList::new();
+		let mut ptr_a = list_a.start;
+		let mut ptr_b = list_b.start;
+
+		// Merge nodes while both lists have nodes
+		while ptr_a.is_some() && ptr_b.is_some() {
+			unsafe {
+				let node_a = ptr_a.unwrap().as_ref();
+				let node_b = ptr_b.unwrap().as_ref();
+
+				if node_a.val <= node_b.val {
+					// Take node from list_a
+					let mut new_node = Box::new(Node::new(std::ptr::read(&node_a.val)));
+					new_node.next = None;
+					let node_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
+					
+					match result.end {
+						None => result.start = node_ptr,
+						Some(end_ptr) => (*end_ptr.as_ptr()).next = node_ptr,
+					}
+					result.end = node_ptr;
+					result.length += 1;
+					
+					ptr_a = node_a.next;
+				} else {
+					// Take node from list_b
+					let mut new_node = Box::new(Node::new(std::ptr::read(&node_b.val)));
+					new_node.next = None;
+					let node_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
+					
+					match result.end {
+						None => result.start = node_ptr,
+						Some(end_ptr) => (*end_ptr.as_ptr()).next = node_ptr,
+					}
+					result.end = node_ptr;
+					result.length += 1;
+					
+					ptr_b = node_b.next;
+				}
+			}
+		}
+
+		// Add remaining nodes from list_a
+		while let Some(node_ptr) = ptr_a {
+			unsafe {
+				let node = node_ptr.as_ref();
+				let mut new_node = Box::new(Node::new(std::ptr::read(&node.val)));
+				new_node.next = None;
+				let new_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
+				
+				match result.end {
+					None => result.start = new_ptr,
+					Some(end_ptr) => (*end_ptr.as_ptr()).next = new_ptr,
+				}
+				result.end = new_ptr;
+				result.length += 1;
+				
+				ptr_a = node.next;
+			}
+		}
+
+		// Add remaining nodes from list_b
+		while let Some(node_ptr) = ptr_b {
+			unsafe {
+				let node = node_ptr.as_ref();
+				let mut new_node = Box::new(Node::new(std::ptr::read(&node.val)));
+				new_node.next = None;
+				let new_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
+				
+				match result.end {
+					None => result.start = new_ptr,
+					Some(end_ptr) => (*end_ptr.as_ptr()).next = new_ptr,
+				}
+				result.end = new_ptr;
+				result.length += 1;
+				
+				ptr_b = node.next;
+			}
+		}
+
+		result
 	}
 }
 
