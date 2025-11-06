@@ -80,12 +80,10 @@ impl<T> LinkedList<T> {
 		while let Some(node_ptr) = current {
 			unsafe {
 				let node = node_ptr.as_ptr();
-				// Save the next node to visit BEFORE swapping
-				let next_node = (*node).prev;
 				// Swap next and prev pointers
 				std::mem::swap(&mut (*node).next, &mut (*node).prev);
-				// Move to the saved next node
-				current = next_node;
+				// Move to next node (which is now in prev due to swap)
+				current = (*node).prev;
 			}
 		}
 	}
